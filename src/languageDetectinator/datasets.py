@@ -4,34 +4,8 @@
 import wikipedia
 from unidecode import unidecode
 import re
+import numpy as np
 
-class Language():
-
-    def __init__(self, language: str, topics: list=None, vocabulary: list=None) -> None:
-        self.language = language
-        self.topics = topics
-        self.vocabulary = vocabulary
-        return None
-    
-    def generateTopics(self, n: int) -> list:
-        self.topics = wikipedia.random(n)
-        return wikipedia.random(n)
-    
-    def generateVocabulary(self) -> list:
-        """Generate a Vocabulary object
-        
-        """
-        if self.topics is None:
-            raise TypeError("Topics cannot be None. Must be iterable")
-        
-        vocabulary = ""
-        for topic in self.topics:
-            page = wikipedia.WikipediaPage(topic)
-            vocabulary += f"{unidecode(page.content)} "
-        
-        self.vocabulary = Vocabulary(vocabulary)
-        return self.vocabulary
-    
 class Vocabulary():
 
     def __init__(self, text: str) -> None:
@@ -55,7 +29,7 @@ class Vocabulary():
         self.words = list(set(self.words))
         return self.words
 
-    def vectorizeVocabulary(self, n: int) -> list:
+    def vectorizeVocabulary(self, n: int) -> np.array:
         """Converts the vocabulary into a vectorized form from the Latin alphabet (26 chars)
         
         """
@@ -67,5 +41,47 @@ class Vocabulary():
                 vec += (str(0)*ind + str(1) + str(0)*(25-ind))
             excess = n-len(word)
             vec += str(0)*26*excess
+            vec = [float(v) for v in vec]
             self.vectors.append(vec)
+        self.vectors = np.array(self.vectors)
         return self.vectors
+
+class Language():
+
+    def __init__(self, language: str, topics: list=None, vocabulary: list=None) -> None:
+        self.language = language
+        self.topics = topics
+        self.vocabulary = vocabulary
+        return None
+    
+    def generateTopics(self, n: int) -> list:
+        """Generates n random topics from wikipedia in the specified language
+        
+        """
+        wikipedia.set_lang(self.language)
+        self.topics = wikipedia.random(n)
+        return wikipedia.random(n)
+    
+    def generateVocabulary(self, topics: list=None) -> Vocabulary:
+        """Generate a Vocabulary object using text from Wikipedia articles
+        
+        """
+        topics = topics or self.topics
+
+        if topics is None:
+            raise TypeError("Topics cannot be None. Must be iterable")
+        
+        vocabulary = ""
+        for topic in topics:
+            page = wikipedia.WikipediaPage(topic)
+            vocabulary += f"{unidecode(page.content)} "
+        
+        self.vocabulary = Vocabulary(vocabulary)
+        return self.vocabulary
+    
+    def setVocabulary(self, text: str) -> None:
+        """Specify the set of words to use as the basis for the vocabulary
+        
+        """
+        self.vocabulary = Vocabulary(text)
+        return None
