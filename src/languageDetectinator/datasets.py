@@ -3,6 +3,7 @@
 """
 import wikipedia
 from unidecode import unidecode
+import re
 
 class Language():
 
@@ -23,28 +24,48 @@ class Language():
         if self.topics is None:
             raise TypeError("Topics cannot be None. Must be iterable")
         
-        vocabulary = []
+        vocabulary = ""
         for topic in self.topics:
             page = wikipedia.WikipediaPage(topic)
-            vocabulary += unidecode(page.content)
+            vocabulary += f"{unidecode(page.content)} "
         
         self.vocabulary = Vocabulary(vocabulary)
         return self.vocabulary
     
 class Vocabulary():
 
-    def __init__(self, words: list) -> None:
-        self.words = words
+    def __init__(self, text: str) -> None:
+        self.text = text
         return None
     
     def pruneVocabulary(self, n: int) -> list:
         """Removes duplicate words and words above the desired length
         
         """
-        return list()
+        subText = self.text.lower()
+        subText = re.sub(r"[^a-zA-Z\s]", "", subText)
+        words = subText.split()
 
-    def vectorizeVocabulary(self) -> list:
+        self.words = []
+        for word in words:
+            if len(word) > n:
+                continue
+            self.words.append(word)
+        
+        self.words = list(set(self.words))
+        return self.words
+
+    def vectorizeVocabulary(self, n: int) -> list:
         """Converts the vocabulary into a vectorized form from the Latin alphabet (26 chars)
         
         """
-        return list()
+        self.vectors = []
+        for word in self.words:
+            vec = ""
+            for i,l in enumerate(word):
+                ind = ord(l)-97
+                vec += (str(0)*ind + str(1) + str(0)*(25-ind))
+            excess = n-len(word)
+            vec += str(0)*26*excess
+            self.vectors.append(vec)
+        return self.vectors
