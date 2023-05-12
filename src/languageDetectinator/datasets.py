@@ -5,6 +5,7 @@ import wikipedia
 from unidecode import unidecode
 import re
 import numpy as np
+import random
 
 class Vocabulary():
 
@@ -48,7 +49,7 @@ class Vocabulary():
 
 class Language():
 
-    def __init__(self, language: str, topics: list=None, vocabulary: list=None) -> None:
+    def __init__(self, language: str, topics: list=None, vocabulary: str=None) -> None:
         self.language = language
         self.topics = topics
         self.vocabulary = vocabulary
@@ -73,11 +74,23 @@ class Language():
         
         vocabulary = ""
         for topic in topics:
-            page = wikipedia.WikipediaPage(topic)
+            page = self._randomPageSelector(topic)
             vocabulary += f"{unidecode(page.content)} "
         
         self.vocabulary = Vocabulary(vocabulary)
         return self.vocabulary
+    
+    def _randomPageSelector(self,topic):
+        selection = False
+        while not selection:
+            # try and get the page but if it breaks we take a different random page
+            try:
+                print(f"Getting page for: {topic}")
+                page = wikipedia.WikipediaPage(title=topic)
+                selection = True
+            except:
+                topic = wikipedia.random(1)
+        return page
     
     def setVocabulary(self, text: str) -> None:
         """Specify the set of words to use as the basis for the vocabulary
