@@ -11,7 +11,7 @@ def main():
     topicDict = {}
     for i,l in enumerate(languages):
         lang = Language(l)
-        lang.generateTopics(5)
+        lang.generateTopics(10)
         lang.generateVocabulary()
         topicDict[l] = lang.topics
 
