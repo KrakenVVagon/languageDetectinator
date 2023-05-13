@@ -27,6 +27,7 @@ def main():
         vecs.append(combVec)
 
     vecs = np.vstack(vecs)
+    np.save("./data/processed/vectors.npy",vecs)
 
 if __name__ == "__main__":
     main()
