@@ -10,7 +10,9 @@ def outputVector(index: int, totalLangs: int) -> np.array:
     return np.array([float(v) for v in stringVec])
 
 def main():
-    languages = ["en","fr","de","es","cs","pt","pl","ar","ru","ja"]
+    with open("./data/meta/languages.txt","r") as file:
+        languages = file.read()
+        languages = languages.split(",")
 
     vecs = []
     for i,l in enumerate(languages):
@@ -19,10 +21,12 @@ def main():
 
         vocab.pruneVocabulary(10)
         vocabVec = vocab.vectorizeVocabulary(10)
-        outVec = outputVector(i,10)
-        modelVec = [outVec,vocabVec]
+        outVec = outputVector(i,10).reshape(1,10)
 
-        vecs.append(modelVec)
+        combVec = np.concatenate((vocabVec,np.repeat(outVec,vocabVec.shape[0],axis=0)),axis=1)
+        vecs.append(combVec)
+
+    vecs = np.vstack(vecs)
 
 if __name__ == "__main__":
     main()

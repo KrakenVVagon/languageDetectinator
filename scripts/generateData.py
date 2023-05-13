@@ -6,7 +6,9 @@ from languageDetectinator.datasets import Language
 import pandas as pd
 
 def main():
-    languages = ["en","fr","de","es","cs","pt","pl","ar","ru","ja"]
+    with open("./data/meta/languages.txt","r") as file:
+        languages = file.read()
+        languages = languages.split(",")
 
     topicDict = {}
     for i,l in enumerate(languages):
