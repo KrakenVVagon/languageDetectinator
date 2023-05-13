@@ -5,7 +5,6 @@ import wikipedia
 from unidecode import unidecode
 import re
 import numpy as np
-import random
 
 class Vocabulary():
 
