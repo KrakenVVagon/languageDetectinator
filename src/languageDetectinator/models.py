@@ -1,15 +1,17 @@
 """Deep learning models to learn and guess what language a word is
 
 """
-
-import pandas as pd
 import numpy as np
 import torch
 from torch import nn
 from torch import optim
+from torch.utils.data import TensorDataset, DataLoader
+import math
 
 class LanguageDetector_CNN(nn.Module):
-
+    """CNN version of a language detector network
+    
+    """
     def __init__(self, inputSize: int, hiddenSize: int, outputSize: int) -> None:
         super(LanguageDetector_CNN,self).__init__()
         self.inputSize = inputSize
@@ -37,7 +39,9 @@ class LanguageDetector_CNN(nn.Module):
         return x
     
 class LanguageDetector_FFNN(nn.Module):
-
+    """More traditional FFNN language detector network
+    
+    """
     def __init__(self, inputSize: int, outputSize: int, hiddenSize: int):
         super(LanguageDetector_FFNN,self).__init__()
         self.inputSize = inputSize
@@ -55,14 +59,39 @@ class LanguageDetector_FFNN(nn.Module):
         x = self.fc2(x)
         x = self.softmax(x)
         return x
-    
-class ModelTrainer():
 
-    def __init__(self, model: nn.Module):
+class ModelTrainer():
+    """General framework to train PyTorch models
+    
+    """
+    def __init__(self, model: nn.Module, device: torch.DeviceObjType):
+        self.model = model
+        self.device = device
         return None
     
-    def _loadData(self):
-        return None
+    def _loadData(self, inputs: np.array, labels: np.array) -> TensorDataset:
+        """Transform the data from numpy arrays into PyTorch tensors.
+        
+        """
+        inputTensor = torch.from_numpy(inputs).float()
+        labelTensor = torch.from_numpy(labels)
+        return TensorDataset(inputTensor, labelTensor)
     
-    def train(epochs, inputs, labels, optimzier, criterion):
+    def train(self, epochs: int, inputs: np.array, labels: np.array, optimzier: optim.Optimizer, criterion: nn.Module, batch_size: int=32):
+        trainLoader = DataLoader(self._loadData(inputs,labels),batch_size=batch_size)
+        totalSteps = math.ceil(len(trainLoader/batch_size))
+
+        for e in range(epochs):
+            for i, (inputTensor, labelTensor) in enumerate(trainLoader):
+                inputTensor = inputTensor.to(self.device)
+                labelTensor = labelTensor.to(self.device)
+
+                optimzier.zero_grad()
+                outputTensor =  self.model(inputTensor)
+                loss = criterion(outputTensor,labelTensor)
+                loss.backward()
+                optimzier.step()
+
+                if (i+1) % 100 == 0:
+                    print(f"Epoch [{e+1}/{epochs}], Step [{i+1}/{totalSteps}], Loss: {loss.item():.4f}")
         return None
