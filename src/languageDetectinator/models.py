@@ -8,10 +8,10 @@ import torch
 from torch import nn
 from torch import optim
 
-class LanguageDetector(nn.Module):
+class LanguageDetector_CNN(nn.Module):
 
     def __init__(self, inputSize: int, hiddenSize: int, outputSize: int) -> None:
-        super(LanguageDetector,self).__init__()
+        super(LanguageDetector_CNN,self).__init__()
         self.inputSize = inputSize
         self.hiddenSize = hiddenSize
         self.outputSize = outputSize
@@ -35,3 +35,34 @@ class LanguageDetector(nn.Module):
         x = nn.functional.relu(x)
         x = self.fc2(x)
         return x
+    
+class LanguageDetector_FFNN(nn.Module):
+
+    def __init__(self, inputSize: int, outputSize: int, hiddenSize: int):
+        super(LanguageDetector_FFNN,self).__init__()
+        self.inputSize = inputSize
+        self.outputSize = outputSize
+        self.hiddenSize = hiddenSize
+        self.fc1 = nn.Linear(inputSize,hiddenSize)
+        self.fc2 = nn.Linear(hiddenSize, outputSize)
+        self.relu = nn.ReLU()
+        self.softmax = nn.Softmax(dim=1)
+        return None
+
+    def forward(self,x):
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
+        x = self.softmax(x)
+        return x
+    
+class ModelTrainer():
+
+    def __init__(self, model: nn.Module):
+        return None
+    
+    def _loadData(self):
+        return None
+    
+    def train(epochs, inputs, labels, optimzier, criterion):
+        return None
