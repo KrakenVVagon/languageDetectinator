@@ -6,7 +6,6 @@ import torch
 from torch import nn
 from torch import optim
 from torch.utils.data import TensorDataset, DataLoader
-import math
 
 class LanguageDetector_CNN(nn.Module):
     """CNN version of a language detector network
@@ -80,7 +79,7 @@ class ModelTrainer():
         return TensorDataset(inputTensor, labelTensor)
     
     def validate(self, validationData: tuple, batch_size: int, criterion: nn.Module) -> tuple:
-        """Validation loop in order to get model accuracy while training
+        """Validation loop in order to get model accuracy while training. Can also be used for testing.
         
         """
         validationLoader = DataLoader(self._loadData(validationData[0],validationData[1]), batch_size=batch_size)
@@ -97,17 +96,17 @@ class ModelTrainer():
 
                 validationOutputs = self.model(inputTensor)
                 valLoss += criterion(validationOutputs, labelTensor).item()
-
-                _, valPrediction = torch.max(validationOutputs.data,1)
-                totalSamples += labelTensor.size[0]
-                correctSamples += (valPrediction == labelTensor).sum().item()
+                _, predicted = torch.max(validationOutputs.data, 1)
+                _, accLabels = torch.max(labelTensor.data, 1)
+                totalSamples += labelTensor.size(0)
+                correctSamples += (predicted == accLabels).sum().item()
 
             valLoss /= len(validationLoader)
             valAccuracy = correctSamples / totalSamples
 
         return (valLoss, valAccuracy)
     
-    def train(self, epochs: int, inputs: np.array, labels: np.array, optimzier: optim.Optimizer, criterion: nn.Module, batch_size: int=32, validation_data: tuple=None):
+    def train(self, epochs: int, inputs: np.array, labels: np.array, optimzier: optim.Optimizer, criterion: nn.Module, batch_size: int=32, validation_data: tuple=None) -> list:
         trainLoader = DataLoader(self._loadData(inputs,labels),batch_size=batch_size)
 
         history = []
@@ -125,13 +124,11 @@ class ModelTrainer():
 
                 epochLoss += loss.item()
 
-                if (i+1) % 100 == 0:
-                    print(f"Epoch [{e+1}/{epochs}], Loss: {loss.item():.4f}")
-
             if validation_data is not None:
-                valLoss, valAccuracy = self.validate(validation_data, batch_size)
+                valLoss, valAccuracy = self.validate(validation_data, batch_size, criterion)
                 
             epochLoss /= len(trainLoader)
-            history.append((e,epochLoss))
+            history.append((epochLoss, valLoss, valAccuracy))
+            print(f"Epoch: {e+1}; loss: {epochLoss:.4f}; valLoss: {valLoss:.4f}; valAcc: {valAccuracy:.4f}")
 
         return history

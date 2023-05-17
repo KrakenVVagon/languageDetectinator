@@ -21,8 +21,11 @@ def loadData(filePath):
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 inputs, labels = loadData("./data/processed/vectors.npy")
+x_train, x_pre, y_train, y_pre = train_test_split(inputs,labels,test_size=0.2)
+x_val, x_test, y_val, y_test = train_test_split(x_pre, y_pre, test_size=0.5)
 
-cnn_model = LanguageDetector_FFNN(260, 10)
-cnn_trainer = ModelTrainer(cnn_model,device)
+ffnn_model = LanguageDetector_FFNN(260, 10)
+ffnn_trainer = ModelTrainer(ffnn_model,device)
+optimizer = optim.Adam(ffnn_model.parameters(), lr=0.001)
 
-history = cnn_trainer.train(200, inputs, labels, optim.Adam(cnn_model.parameters(), lr=0.001), nn.CrossEntropyLoss())
+history = ffnn_trainer.train(200, inputs, labels, optimizer, nn.CrossEntropyLoss(), validation_data=(x_val,y_val))
