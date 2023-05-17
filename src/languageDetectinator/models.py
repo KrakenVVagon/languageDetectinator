@@ -18,9 +18,9 @@ class LanguageDetector_CNN(nn.Module):
         self.hiddenSize = hiddenSize
         self.outputSize = outputSize
         self.conv1 = nn.Conv1d(self.inputSize,self.hiddenSize,kernel_size=3,padding=1)
-        self.pool1 = nn.MaxPool1d(kernel_size=2)
+        self.pool1 = nn.MaxPool1d(kernel_size=1)
         self.conv2 = nn.Conv1d(self.hiddenSize,self.hiddenSize,kernel_size=3,padding=1)
-        self.pool2 = nn.MaxPool1d(kernel_size=2)
+        self.pool2 = nn.MaxPool1d(kernel_size=1)
         self.fc1 = nn.Linear(self.hiddenSize*32,512)
         self.fc2 = nn.Linear(512,self.outputSize)
         return None
@@ -42,13 +42,13 @@ class LanguageDetector_FFNN(nn.Module):
     """More traditional FFNN language detector network
     
     """
-    def __init__(self, inputSize: int, outputSize: int, hiddenSize: int):
+    def __init__(self, inputSize: int, outputSize: int):
         super(LanguageDetector_FFNN,self).__init__()
         self.inputSize = inputSize
         self.outputSize = outputSize
-        self.hiddenSize = hiddenSize
-        self.fc1 = nn.Linear(inputSize,hiddenSize)
-        self.fc2 = nn.Linear(hiddenSize, outputSize)
+        self.fc1 = nn.Linear(self.inputSize, 150)
+        self.fc2 = nn.Linear(150, 100)
+        self.fc3 = nn.Linear(100, self.outputSize)
         self.relu = nn.ReLU()
         self.softmax = nn.Softmax(dim=1)
         return None
@@ -57,6 +57,8 @@ class LanguageDetector_FFNN(nn.Module):
         x = self.fc1(x)
         x = self.relu(x)
         x = self.fc2(x)
+        x = self.relu(x)
+        x = self.fc3(x)
         x = self.softmax(x)
         return x
 
@@ -77,11 +79,40 @@ class ModelTrainer():
         labelTensor = torch.from_numpy(labels)
         return TensorDataset(inputTensor, labelTensor)
     
-    def train(self, epochs: int, inputs: np.array, labels: np.array, optimzier: optim.Optimizer, criterion: nn.Module, batch_size: int=32):
-        trainLoader = DataLoader(self._loadData(inputs,labels),batch_size=batch_size)
-        totalSteps = math.ceil(len(trainLoader/batch_size))
+    def validate(self, validationData: tuple, batch_size: int, criterion: nn.Module) -> tuple:
+        """Validation loop in order to get model accuracy while training
+        
+        """
+        validationLoader = DataLoader(self._loadData(validationData[0],validationData[1]), batch_size=batch_size)
 
+        self.model.eval()
+        with torch.no_grad():
+            valLoss = 0
+            totalSamples = 0
+            correctSamples = 0
+
+            for i, (inputTensor, labelTensor) in enumerate(validationLoader):
+                inputTensor = inputTensor.to(self.device)
+                labelTensor = labelTensor.to(self.device)
+
+                validationOutputs = self.model(inputTensor)
+                valLoss += criterion(validationOutputs, labelTensor).item()
+
+                _, valPrediction = torch.max(validationOutputs.data,1)
+                totalSamples += labelTensor.size[0]
+                correctSamples += (valPrediction == labelTensor).sum().item()
+
+            valLoss /= len(validationLoader)
+            valAccuracy = correctSamples / totalSamples
+
+        return (valLoss, valAccuracy)
+    
+    def train(self, epochs: int, inputs: np.array, labels: np.array, optimzier: optim.Optimizer, criterion: nn.Module, batch_size: int=32, validation_data: tuple=None):
+        trainLoader = DataLoader(self._loadData(inputs,labels),batch_size=batch_size)
+
+        history = []
         for e in range(epochs):
+            epochLoss = 0
             for i, (inputTensor, labelTensor) in enumerate(trainLoader):
                 inputTensor = inputTensor.to(self.device)
                 labelTensor = labelTensor.to(self.device)
@@ -92,6 +123,15 @@ class ModelTrainer():
                 loss.backward()
                 optimzier.step()
 
+                epochLoss += loss.item()
+
                 if (i+1) % 100 == 0:
-                    print(f"Epoch [{e+1}/{epochs}], Step [{i+1}/{totalSteps}], Loss: {loss.item():.4f}")
-        return None
+                    print(f"Epoch [{e+1}/{epochs}], Loss: {loss.item():.4f}")
+
+            if validation_data is not None:
+                valLoss, valAccuracy = self.validate(validation_data, batch_size)
+                
+            epochLoss /= len(trainLoader)
+            history.append((e,epochLoss))
+
+        return history
