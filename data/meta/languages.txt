@@ -1,1 +1,1 @@
-en,fr,de,es,cs,pt,pl,ar,ru,ja
+en,fr,de,es,cs,pt,pl

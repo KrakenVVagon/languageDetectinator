@@ -19,9 +19,9 @@ def main():
         with open(f"./data/raw/{l}_text.txt","r") as file:
             vocab = Vocabulary(file.read())
 
-        vocab.pruneVocabulary(10)
-        vocabVec = vocab.vectorizeVocabulary(10)
-        outVec = outputVector(i,10).reshape(1,10)
+        vocab.pruneVocabulary(15)
+        vocabVec = vocab.vectorizeVocabulary(15)
+        outVec = outputVector(i,7).reshape(1,7)
 
         combVec = np.concatenate((vocabVec,np.repeat(outVec,vocabVec.shape[0],axis=0)),axis=1)
         vecs.append(combVec)
