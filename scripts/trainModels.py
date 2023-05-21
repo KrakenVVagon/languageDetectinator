@@ -18,7 +18,7 @@ def loadData(filePath, langNum):
     labels = data[:,-langNum:]
     return inputs, labels
 
-langNum = 9
+langNum = 5
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 inputs, labels = loadData("./data/processed/vectors.npy", langNum)
@@ -29,4 +29,4 @@ ffnn_model = LanguageDetector_FFNN(312, langNum)
 ffnn_trainer = ModelTrainer(ffnn_model,device)
 optimizer = optim.Adam(ffnn_model.parameters(), lr=0.0001)
 
-history = ffnn_trainer.train(200, inputs, labels, optimizer, nn.CrossEntropyLoss(), validation_data=(x_val,y_val), batch_size=1024)
+history = ffnn_trainer.train(200, inputs, labels, optimizer, nn.CrossEntropyLoss(), validation_data=(x_val,y_val), batch_size=4096)

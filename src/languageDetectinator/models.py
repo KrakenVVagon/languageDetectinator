@@ -45,23 +45,19 @@ class LanguageDetector_FFNN(nn.Module):
         super(LanguageDetector_FFNN,self).__init__()
         self.inputSize = inputSize
         self.outputSize = outputSize
-        self.fc1 = nn.Linear(self.inputSize, 256)
-        self.fc2 = nn.Linear(256, 512)
-        self.fc3 = nn.Linear(512, 750)
-        self.fc4 = nn.Linear(750, 750)
-        self.fc5 = nn.Linear(750, self.outputSize)
+        self.fc1 = nn.Linear(self.inputSize, 30)
+        self.fc2 = nn.Linear(30, 15)
+        self.fc5 = nn.Linear(15, self.outputSize)
         self.relu = nn.ReLU()
+        self.sigmoid = nn.Sigmoid()
         self.dropout = nn.Dropout(0.5)
         self.softmax = nn.Softmax(dim=1)
         return None
 
     def forward(self,x):
         x = self.relu(self.fc1(x))
+        x = self.dropout(x)
         x = self.relu(self.fc2(x))
-        x = self.dropout(x)
-        x = self.relu(self.fc3(x))
-        x = self.dropout(x)
-        x = self.relu(self.fc4(x))
         x = self.dropout(x)
         x = self.softmax(self.fc5(x))
         return x

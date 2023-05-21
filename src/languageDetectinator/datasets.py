@@ -12,7 +12,7 @@ class Vocabulary():
         self.text = text
         return None
     
-    def pruneVocabulary(self, n: int) -> list:
+    def pruneVocabulary(self, n: int, duplicate: bool=False) -> list:
         """Removes duplicate words and words above the desired length
         
         """
@@ -26,8 +26,9 @@ class Vocabulary():
                 continue
             self.words.append(word)
         
-        self.words = list(set(self.words))
-        return self.words
+        if duplicate:
+            return self.words
+        return list(set(self.words))
 
     def vectorizeVocabulary(self, n: int) -> np.array:
         """Converts the vocabulary into a vectorized form from the Latin alphabet (26 chars)
