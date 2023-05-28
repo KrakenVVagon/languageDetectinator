@@ -12,12 +12,15 @@ class Vocabulary():
         self.text = text
         return None
     
-    def pruneVocabulary(self, n: int, duplicate: bool=False) -> list:
+    def pruneVocabulary(self, n: int, duplicate: bool=False, keepAccents: bool=False) -> list:
         """Removes duplicate words and words above the desired length
         
         """
         subText = self.text.lower()
-        subText = re.sub(r"[^a-zA-Z\s]", "", subText)
+        if keepAccents:
+            subText = re.sub(r"[^a-zA-ZÀ-ÿ\s]", "", subText)
+        else:
+            subText = re.sub(r"[^a-zA-Z\s]", "", subText)
         words = subText.split()
 
         self.words = []
@@ -53,6 +56,7 @@ class Language():
         self.language = language
         self.topics = topics
         self.vocabulary = vocabulary
+        wikipedia.set_lang(self.language)
         return None
     
     def generateTopics(self, n: int) -> list:
@@ -63,7 +67,7 @@ class Language():
         self.topics = wikipedia.random(n)
         return wikipedia.random(n)
     
-    def generateVocabulary(self, topics: list=None) -> Vocabulary:
+    def generateVocabulary(self, topics: list=None, decodeLang: bool=True) -> Vocabulary:
         """Generate a Vocabulary object using text from Wikipedia articles
         
         """
@@ -75,7 +79,11 @@ class Language():
         vocabulary = ""
         for topic in topics:
             page = self._randomPageSelector(topic)
-            vocabulary += f"{unidecode(page.content)} "
+
+            if decodeLang:
+                vocabulary += f"{unidecode(page.content)} "
+            else:
+                vocabulary += f"{page.content} "
         
         self.vocabulary = Vocabulary(vocabulary)
         return self.vocabulary
