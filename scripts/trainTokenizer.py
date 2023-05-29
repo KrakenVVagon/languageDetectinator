@@ -2,14 +2,9 @@ from tokenizers import Tokenizer
 from tokenizers.models import BPE
 from tokenizers.trainers import BpeTrainer
 from tokenizers.pre_tokenizers import Whitespace
-import numpy as np
-
-def outputVector(index: int, totalLangs: int) -> np.array:
-    stringVec = str(0)*index + str(1) + str(0)*(totalLangs-1-index)
-    return np.array([float(v) for v in stringVec])
 
 tokenizer = Tokenizer(BPE())
-trainer = BpeTrainer(special_tokens=["[PAD]"])
+trainer = BpeTrainer(special_tokens=["[PAD]", "[UNK]"])
 tokenizer.pre_tokenizer = Whitespace()
 
 with open("data/meta/languages.txt","r") as lanF:
