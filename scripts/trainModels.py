@@ -21,12 +21,12 @@ def loadData(filePath, langNum):
 langNum = 5
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-inputs, labels = loadData("./data/processed/vectors.npy", langNum)
+inputs, labels = loadData("./data/processed/tokenVectors.npy", langNum)
 x_train, x_pre, y_train, y_pre = train_test_split(inputs,labels,test_size=0.2)
 x_val, x_test, y_val, y_test = train_test_split(x_pre, y_pre, test_size=0.5)
 
-ffnn_model = LanguageDetector_FFNN(312, langNum)
+ffnn_model = LanguageDetector_FFNN(15, langNum)
 ffnn_trainer = ModelTrainer(ffnn_model,device)
-optimizer = optim.Adam(ffnn_model.parameters(), lr=0.001)
+optimizer = optim.SGD(ffnn_model.parameters(), lr=0.001)
 
-history = ffnn_trainer.train(200, inputs, labels, optimizer, nn.CrossEntropyLoss(), validation_data=(x_val,y_val), batch_size=1024)
+history = ffnn_trainer.train(20, inputs, labels, optimizer, nn.CrossEntropyLoss(), validation_data=(x_val,y_val), batch_size=1024)

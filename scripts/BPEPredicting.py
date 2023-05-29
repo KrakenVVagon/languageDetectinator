@@ -24,6 +24,6 @@ for i, lang in enumerate(langs):
     outVec = outputVector(i, len(langs))
     tokens += [tokenizer.encode(word).ids+outVec for word in words]
 
-tokens = np.array(tokens)
+tokens = np.array(tokens).astype(float)
 print(tokens.shape)
 np.save("./data/processed/tokenVectors.npy", tokens)
