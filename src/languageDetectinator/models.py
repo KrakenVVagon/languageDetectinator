@@ -6,7 +6,6 @@ import torch
 from torch import nn
 from torch import optim
 from torch.utils.data import TensorDataset, DataLoader
-from tokenizers import Tokenizer, models, processors, trainers, decoders
 
 class LanguageDetector_CNN(nn.Module):
     """CNN version of a language detector network
@@ -63,10 +62,22 @@ class LanguageDetector_RNN(nn.Module):
     
     """
     def __init__(self, inputSize: int, outputSize: int):
+        super(LanguageDetector_RNN,self).__init__()
+        self.inputSize = inputSize
+        self.outputSize = outputSize
+
+        self.i2h = nn.Linear(self.inputSize + 50, 50)
+        self.i2o = nn.Linear(self.inputSize + 50, self.outputSize)
+        self.softmax = nn.LogSoftmax(dim=1)
+
         return None
     
-    def forward(self, x):
-        return None
+    def forward(self, input, hidden):
+        combined = torch.cat((input, hidden), 2)
+        hidden = self.i2h(combined)
+        output = self.i2o(combined)
+        output = self.softmax(output)
+        return output, hidden
 
 class ModelTrainer():
     """General framework to train PyTorch models
@@ -131,6 +142,7 @@ class ModelTrainer():
 
                 epochLoss += loss.item()
 
+            valLoss, valAccuracy = None, None
             if validation_data is not None:
                 valLoss, valAccuracy = self.validate(validation_data, batch_size, criterion)
                 

@@ -152,3 +152,4 @@ cython_debug/
 #.idea/
 /data/processed/vectors.npy
 /data/processed/tokenVectors.npy
+/data/processed/tokenLabels.npy

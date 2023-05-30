@@ -25,8 +25,14 @@ language_tags = {
 
                  }
 
+def outputVector(index: int, totalLangs: int) -> list:
+    stringVec = str(0)*index + str(1) + str(0)*(totalLangs-1-index)
+    return [float(v) for v in stringVec]
+
 def main():
     vecs = []
+    outVecs = []
+    i = 0
     for key, value in language_tags.items():
         lang = Language(key)
         vocab = lang.generateVocabulary(topics=value, decodeLang=True)
@@ -42,8 +48,11 @@ def main():
 
         longVecs = vocab.vectorizeVocabulary(12, flat=False)
         vecs.append(longVecs)
+        outVecs += [i for k in vocab.words]
+        i += 1
 
     np.save("./data/processed/tokenVectors.npy", np.vstack(vecs))
+    np.save("./data/processed/tokenLabels.npy", np.array(outVecs))
 
 if __name__ == "__main__":
     main()
