@@ -57,6 +57,16 @@ class LanguageDetector_FFNN(nn.Module):
         x = self.relu(self.fc1(x))
         x = self.softmax(self.fc5(x))
         return x
+    
+class LanguageDetector_RNN(nn.Module):
+    """Character level RNN like the tutorial uses
+    
+    """
+    def __init__(self, inputSize: int, outputSize: int):
+        return None
+    
+    def forward(self, x):
+        return None
 
 class ModelTrainer():
     """General framework to train PyTorch models

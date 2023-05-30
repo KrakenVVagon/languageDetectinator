@@ -33,12 +33,15 @@ class Vocabulary():
             return self.words
         return list(set(self.words))
 
-    def vectorizeVocabulary(self, n: int) -> np.array:
+    def vectorizeVocabulary(self, n: int, flat: bool=True) -> np.array:
         """Converts the vocabulary into a vectorized form from the Latin alphabet (26 chars)
         
         """
         self.vectors = []
         for word in self.words:
+            if not flat:
+                self.vectors.append(self.longVectorize(n, word))
+                continue
             vec = ""
             for i,l in enumerate(word):
                 ind = ord(l)-97
@@ -47,8 +50,26 @@ class Vocabulary():
             vec += str(0)*26*excess
             vec = [float(v) for v in vec]
             self.vectors.append(vec)
+        
         self.vectors = np.array(self.vectors)
         return self.vectors
+    
+    def longVectorize(self, n: int, word: str) -> np.array:
+        """Converst the vocabulary into a vectors of [len(n), 1, 26]
+        
+        """
+        vectors = []
+        for i,l in enumerate(word):
+            ind = ord(l)-97
+            vec = (str(0)*ind + str(1) + str(0)*(25-ind))
+            vectors.append([float(v) for v in vec])
+
+        vec = np.array(vectors)
+        excess = n - len(vec)
+        z = np.zeros((excess,26))
+        vec = np.vstack([vec,z])
+
+        return vec.reshape(len(vec),1,26)
 
 class Language():
 

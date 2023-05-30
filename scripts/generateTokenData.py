@@ -1,4 +1,5 @@
 from languageDetectinator.datasets import Language
+import numpy as np
 
 language_tags = {
 
@@ -25,18 +26,24 @@ language_tags = {
                  }
 
 def main():
+    vecs = []
     for key, value in language_tags.items():
         lang = Language(key)
-        vocab = lang.generateVocabulary(topics=value, decodeLang=False)
+        vocab = lang.generateVocabulary(topics=value, decodeLang=True)
 
         with open(f"data/raw/{key}_full.txt","w",encoding="utf-8") as txtFile:
             txtFile.write(vocab.text)
 
-        vocab.pruneVocabulary(12, duplicate=False, keepAccents=True)
+        vocab.pruneVocabulary(12, duplicate=False, keepAccents=False)
         print(f"Found {len(vocab.words)} words.")
         
         with open(f"data/processed/{key}_pruned.txt","w",encoding="utf-8") as txtFile:
             txtFile.write(" ".join(vocab.words))
+
+        longVecs = vocab.vectorizeVocabulary(12, flat=False)
+        vecs.append(longVecs)
+
+    np.save("./data/processed/tokenVectors.npy", np.vstack(vecs))
 
 if __name__ == "__main__":
     main()
