@@ -69,7 +69,7 @@ class Vocabulary():
         z = np.zeros((excess,26))
         vec = np.vstack([vec,z])
 
-        return vec.reshape(len(vec),1,26)
+        return vec
 
 class Language():
 
