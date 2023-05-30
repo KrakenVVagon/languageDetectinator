@@ -55,7 +55,7 @@ class Vocabulary():
         return self.vectors
     
     def longVectorize(self, n: int, word: str) -> np.array:
-        """Converst the vocabulary into a vectors of [len(n), 1, 26]
+        """Converst the vocabulary into a vectors of [len(n), 26]
         
         """
         vectors = []
