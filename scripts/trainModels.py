@@ -45,12 +45,6 @@ def validate(validationData: tuple, batch_size: int, criterion: nn.Module, model
             inputTensor = inputTensor.to(device)
             labelTensor = labelTensor.to(device)
 
-            # if inputTensor.size()[1] < hidden.size()[1]:
-            #     hidden = hidden[:, :inputTensor.size()[1], :]
-            
-            # if inputTensor.size()[1] > hidden.size()[1]:
-            #     hidden = hidden.expand(-1, inputTensor.size()[1], -1)
-
             validationOutputs, hidden = model(inputTensor, hidden)
             valLoss += criterion(validationOutputs[-1], labelTensor).item()
             _, predicted = torch.max(validationOutputs[-1].data, 1)
@@ -73,7 +67,12 @@ def train(model: nn.Module, epochs: int, inputs: np.array, labels: np.array, opt
             inputTensor = inputTensor.to(device)
             labelTensor = labelTensor.to(device)
 
-            hidden = torch.zeros(12, inputTensor.size()[1], 50)
+            h1 = torch.zeros(12, inputTensor.size()[1], 128)
+            h2 = torch.zeros(12, inputTensor.size()[1], 256)
+            h3 = torch.zeros(12, inputTensor.size()[1], 512)
+            h4 = torch.zeros(12, inputTensor.size()[1], 1024)
+
+            hidden = [h1, h2, h3, h4]
 
             optimzier.zero_grad()
             outputTensor, hidden =  model(inputTensor, hidden)
@@ -83,7 +82,7 @@ def train(model: nn.Module, epochs: int, inputs: np.array, labels: np.array, opt
 
             epochLoss += loss.item()
 
-        valLoss, valAccuracy = None, None
+        valLoss, valAccuracy = 0, 0
         if validation_data is not None:
             valLoss, valAccuracy = validate(validation_data, batch_size, criterion, model, hidden)
             
@@ -96,22 +95,12 @@ def train(model: nn.Module, epochs: int, inputs: np.array, labels: np.array, opt
 langNum = 5
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-# inputs, labels = loadData("./data/processed/tokenVectors.npy", langNum)
-# x_train, x_pre, y_train, y_pre = train_test_split(inputs,labels,test_size=0.2)
-# x_val, x_test, y_val, y_test = train_test_split(x_pre, y_pre, test_size=0.5)
-
-# ffnn_model = LanguageDetector_FFNN(15, langNum)
-# ffnn_trainer = ModelTrainer(ffnn_model,device)
-# optimizer = optim.Adam(ffnn_model.parameters(), lr=0.005)
-
-#history = ffnn_trainer.train(100, inputs, labels, optimizer, nn.CrossEntropyLoss(), validation_data=(x_val,y_val), batch_size=1024)
-
-rnn = LanguageDetector_RNN(26, 5)
-optimizer = optim.SGD(rnn.parameters(), lr=0.005)
+rnn = LanguageDetector_RNN(26, 5, [128, 256])
+optimizer = optim.Adam(rnn.parameters(), lr=0.00001)
 inputs = np.load("./data/processed/tokenVectors.npy")
 labels = np.load("./data/processed/tokenLabels.npy")
 
 x_train, x_pre, y_train, y_pre = train_test_split(inputs,labels,test_size=0.2)
 x_val, x_test, y_val, y_test = train_test_split(x_pre, y_pre, test_size=0.5)
 
-history = train(rnn, 100, x_train, y_train, optimizer, nn.NLLLoss(), batch_size=64, validation_data=(x_val,y_val))
+history = train(rnn, 100, x_train, y_train, optimizer, nn.NLLLoss(), batch_size=32, validation_data=(x_val,y_val))

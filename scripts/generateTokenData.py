@@ -1,5 +1,6 @@
 from languageDetectinator.datasets import Language
 import numpy as np
+import random
 
 language_tags = {
 
@@ -47,8 +48,9 @@ def main():
             txtFile.write(" ".join(vocab.words))
 
         longVecs = vocab.vectorizeVocabulary(12, flat=False)
+        longVecs = longVecs[np.random.choice(longVecs.shape[0], 10000, replace=False), :, :]
         vecs.append(longVecs)
-        outVecs += [i for k in vocab.words]
+        outVecs += [i]*10000
         i += 1
 
     np.save("./data/processed/tokenVectors.npy", np.vstack(vecs))

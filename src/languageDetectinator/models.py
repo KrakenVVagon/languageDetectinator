@@ -61,23 +61,39 @@ class LanguageDetector_RNN(nn.Module):
     """Character level RNN like the tutorial uses
     
     """
-    def __init__(self, inputSize: int, outputSize: int):
+    def __init__(self, inputSize: int, outputSize: int, hiddenSizes: list):
         super(LanguageDetector_RNN,self).__init__()
         self.inputSize = inputSize
         self.outputSize = outputSize
+        self.hiddenSizes = hiddenSizes
 
-        self.i2h = nn.Linear(self.inputSize + 50, 50)
-        self.i2o = nn.Linear(self.inputSize + 50, self.outputSize)
-        self.softmax = nn.LogSoftmax(dim=1)
+        self.hidden1 = nn.Linear(self.inputSize + 1024, 128)
+        self.hidden2 = nn.Linear(128, 256)
+        self.hidden3 = nn.Linear(256, 512)
+        self.hidden4 = nn.Linear(512, 1024)
+        self.output = nn.Linear(self.inputSize + 1024, self.outputSize)
+        self.softmax = nn.LogSoftmax(dim=2)
 
         return None
-    
+
     def forward(self, input, hidden):
-        combined = torch.cat((input, hidden), 2)
-        hidden = self.i2h(combined)
-        output = self.i2o(combined)
+        combined = torch.cat((input, hidden[-1]), 2)
+
+        h1 = self.hidden1(combined)
+        h2 = self.hidden2(h1)
+        h3 = self.hidden3(h2)
+        h4 = self.hidden4(h3)
+        hidden = [h1, h2, h3, h4]
+
+        output = self.output(combined)
         output = self.softmax(output)
         return output, hidden
+    
+    def initHidden(self, sequence_length: int=1, batch_size: int=1):
+        hidden_states = []
+        for size in self.hiddenSizes:
+            hidden_states.append(torch.zeros(sequence_length, batch_size, size))
+        return hidden_states
 
 class ModelTrainer():
     """General framework to train PyTorch models

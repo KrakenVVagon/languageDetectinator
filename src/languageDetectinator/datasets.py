@@ -31,7 +31,8 @@ class Vocabulary():
         
         if duplicate:
             return self.words
-        return list(set(self.words))
+        self.words = list(set(self.words))
+        return self.words
 
     def vectorizeVocabulary(self, n: int, flat: bool=True) -> np.array:
         """Converts the vocabulary into a vectorized form from the Latin alphabet (26 chars)
