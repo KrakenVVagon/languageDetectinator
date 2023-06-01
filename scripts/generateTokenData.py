@@ -44,7 +44,7 @@ def main():
         vocab.pruneVocabulary(12, duplicate=False, keepAccents=False)
         print(f"Found {len(vocab.words)} words.")
         
-        with open(f"data/processed/{key}_pruned.txt","w",encoding="utf-8") as txtFile:
+        with open(f"data/processed/{key}.txt","w",encoding="utf-8") as txtFile:
             txtFile.write(" ".join(vocab.words))
 
         longVecs = vocab.vectorizeVocabulary(12, flat=False)
