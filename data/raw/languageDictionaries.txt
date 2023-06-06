@@ -1,9 +1,0 @@
-https://kaikki.org/dictionary/English/kaikki.org-dictionary-English.json
-https://kaikki.org/dictionary/French/kaikki.org-dictionary-French.json
-https://kaikki.org/dictionary/Spanish/kaikki.org-dictionary-Spanish.json
-https://kaikki.org/dictionary/German/kaikki.org-dictionary-German.json
-https://kaikki.org/dictionary/Czech/kaikki.org-dictionary-Czech.json
-https://kaikki.org/dictionary/Polish/kaikki.org-dictionary-Polish.json
-https://kaikki.org/dictionary/Portuguese/kaikki.org-dictionary-Portuguese.json
-https://kaikki.org/dictionary/Finnish/kaikki.org-dictionary-Finnish.json
-https://kaikki.org/dictionary/Dutch/kaikki.org-dictionary-Dutch.json
