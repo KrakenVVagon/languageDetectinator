@@ -2,6 +2,7 @@
 
 """
 from languageDetectinator.models import LanguageDetector_RNN, RNN
+from languageDetectinator.datasets import Vocabulary
 import glob
 import os
 import numpy as np
@@ -22,6 +23,9 @@ We want to split the data into train/val/test sections and iterate on these grou
 In order to do that we need to get lists of the words and their corresponding languages and combine them.
 
 Which is why we convert them to vectors in the first place so we know when we are doing the split we know whats up
+
+We actually can do all the pre-processing here in the training script and that actually makes the most sense.
+Generate the raw data with another script though.
 """
 
 def findFiles(path): return glob.glob(path)
@@ -76,18 +80,24 @@ def evaluate(model, line_tensor):
 
     return output
 
-categories = []
-categoryText = {}
+langNum = 0
+languageIds = []
+languageVectors = []
 
-for fileName in findFiles("data/processed/*.txt"):
-    category = os.path.splitext(os.path.basename(fileName))[0]
-    categories.append(category)
-    lines = readNames(fileName)
-    categoryText[category] = lines
+for languageFile in findFiles("data/raw/*.txt"):
+    languageName = os.path.splitext(os.path.basename(languageFile))[0]
+    languageText = open(languageFile, "r", encoding="utf-8").read()
+    languageVocab = Vocabulary(languageText)
+    words = languageVocab.pruneVocabulary(12)
+    languageVectors += languageVocab.longVectorize(words=words)
+    languageIds += [langNum]*len(words)
+    langNum += 1
 
-nCategories = len(categories)
+x_train, testX, y_train, testY = train_test_split(languageVectors, languageIds, test_size=0.2)
+x_val, x_test, y_val, y_test = train_test_split(testX, testY, test_size=0.5)
+
 n_hidden = 128
-rnn = RNN(26, n_hidden, nCategories)
+rnn = RNN(26, n_hidden, langNum+1)
 criterion = nn.NLLLoss()
 optimizer = optim.SGD(rnn.parameters(), lr=0.005)
 

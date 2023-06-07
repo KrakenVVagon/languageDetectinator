@@ -5,6 +5,7 @@ import wikipedia
 from unidecode import unidecode
 import re
 import numpy as np
+from typing import Iterable
 
 class Vocabulary():
 
@@ -34,15 +35,12 @@ class Vocabulary():
         self.words = list(set(self.words))
         return self.words
 
-    def vectorizeVocabulary(self, n: int, flat: bool=True) -> np.array:
+    def vectorizeVocabulary(self, n: int) -> np.array:
         """Converts the vocabulary into a vectorized form from the Latin alphabet (26 chars)
         
         """
         self.vectors = []
         for word in self.words:
-            if not flat:
-                self.vectors.append(self.longVectorize(n, word))
-                continue
             vec = ""
             for i,l in enumerate(word):
                 ind = ord(l)-97
@@ -55,22 +53,22 @@ class Vocabulary():
         self.vectors = np.array(self.vectors)
         return self.vectors
     
-    def longVectorize(self, n: int, word: str) -> np.array:
+    def longVectorize(self, words: Iterable[str]=None) -> list:
         """Converst the vocabulary into a vectors of [len(n), 26]
         
         """
-        vectors = []
-        for i,l in enumerate(word):
-            ind = ord(l)-97
-            vec = (str(0)*ind + str(1) + str(0)*(25-ind))
-            vectors.append([float(v) for v in vec])
+        words = words or self.words
+        self.longVectors = []
 
-        vec = np.array(vectors)
-        excess = n - len(vec)
-        z = np.zeros((excess,26))
-        vec = np.vstack([vec,z])
+        for word in words:
+            wordVec = []
+            for i,l in enumerate(word):
+                ind = ord(l)-97
+                vec = (str(0)*ind + str(1) + str(0)*(25-ind))
+                wordVec.append([float(v) for v in vec])
+            self.longVectors.append(wordVec)
 
-        return vec
+        return self.longVectors
 
 class Language():
 
