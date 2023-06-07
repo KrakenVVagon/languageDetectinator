@@ -13,6 +13,17 @@ from torch.utils.data import TensorDataset, DataLoader
 from typing import Iterable, Tuple
 import random
 
+"""
+If the input for the model is going to be text then it should just accept text input and not some vectorized nonsense.
+
+We want be able to use a more epoch-based approach since that is the more common method for training models.
+We want to split the data into train/val/test sections and iterate on these groups
+
+In order to do that we need to get lists of the words and their corresponding languages and combine them.
+
+Which is why we convert them to vectors in the first place so we know when we are doing the split we know whats up
+"""
+
 def findFiles(path): return glob.glob(path)
 
 def readNames(fileName: str) -> list:
@@ -139,3 +150,39 @@ print(f"Overall accuracy: {correct/n_confusion*100:.4f}%")
 #         valAccuracy = correctSamples / totalSamples
 
 #     return (valLoss, valAccuracy)
+
+# def train(model: nn.Module, epochs: int, inputs: np.array, labels: np.array, optimzier: optim.Optimizer, criterion: nn.Module, batch_size: int=32, validation_data: tuple=None) -> list:
+#     trainLoader = DataLoader(_loadData(inputs,labels),batch_size=batch_size, drop_last=True)
+
+#     history = []
+#     for e in range(epochs):
+#         epochLoss = 0
+#         for i, (inputTensor, labelTensor) in enumerate(trainLoader):
+#             inputTensor = torch.permute(inputTensor, (1, 0, 2))
+#             inputTensor = inputTensor.to(device)
+#             labelTensor = labelTensor.to(device)
+
+#             h1 = torch.zeros(12, inputTensor.size()[1], 128)
+#             h2 = torch.zeros(12, inputTensor.size()[1], 256)
+#             h3 = torch.zeros(12, inputTensor.size()[1], 512)
+#             h4 = torch.zeros(12, inputTensor.size()[1], 1024)
+
+#             hidden = [h1, h2, h3, h4]
+
+#             optimzier.zero_grad()
+#             outputTensor, hidden =  model(inputTensor, hidden)
+#             loss = criterion(outputTensor[-1],labelTensor)
+#             loss.backward()
+#             optimzier.step()
+
+#             epochLoss += loss.item()
+
+#         valLoss, valAccuracy = 0, 0
+#         if validation_data is not None:
+#             valLoss, valAccuracy = validate(validation_data, batch_size, criterion, model, hidden)
+            
+#         epochLoss /= len(trainLoader)
+#         history.append((epochLoss, valLoss, valAccuracy))
+#         print(f"Epoch: {e+1}; loss: {epochLoss:.4f}; valLoss: {valLoss:.4f}; valAcc: {valAccuracy:.4f}")
+
+#     return history
