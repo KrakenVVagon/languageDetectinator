@@ -6,6 +6,24 @@ from unidecode import unidecode
 import re
 import numpy as np
 from typing import Iterable
+from torch.utils.data import TensorDataset
+import torch
+
+class languageDataset(TensorDataset):
+    def __init__(self, inputs, labels):
+        self.inputs = inputs
+        self.labels = labels
+        return None
+    
+    def __len__(self):
+        return len(self.inputs)
+    
+    # we want this to return a value (label) and then a torch tensor for the inputs
+    # tensor should have shape (len(input), numChars)
+    def __getitem__(self, index):
+        array = np.array(self.inputs[index])
+        array = array.reshape(len(self.inputs[index]), 26)
+        return torch.from_numpy(array).type(torch.float32), torch.tensor([self.labels[index]], dtype=torch.long)
 
 class Vocabulary():
 

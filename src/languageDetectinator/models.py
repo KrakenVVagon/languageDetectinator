@@ -5,7 +5,6 @@ import numpy as np
 import torch
 from torch import nn
 from torch import optim
-from torch.utils.data import TensorDataset, DataLoader
 
 class RNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
