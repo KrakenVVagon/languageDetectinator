@@ -63,8 +63,8 @@ def train(model, epochs, category_tensor, line_tensor, optimizer, criterion, val
         
         epochLoss /= len(trainLoader)
         history.append(epochLoss)
-        valLoss, valAccuracy = 0, 0
 
+        valLoss, valAccuracy = 0, 0
         if validationData is not None:
             valLoss, valAccuracy = validate(model, validationData, criterion)
 
@@ -89,7 +89,7 @@ for languageFile in findFiles("data/raw/*.txt"):
     languages.append(languageName)
     languageText = open(languageFile, "r", encoding="utf-8").read()
     languageVocab = Vocabulary(languageText)
-    words = languageVocab.pruneVocabulary(12)
+    words = languageVocab.pruneVocabulary(12, duplicate=False)
     languageVectors += languageVocab.longVectorize(words=words)
     languageIds += [len(languages)-1]*len(words)
 
@@ -101,7 +101,7 @@ rnn = RNN(26, n_hidden, len(languages))
 criterion = nn.NLLLoss()
 optimizer = optim.SGD(rnn.parameters(), lr=0.005)
 
-history = train(rnn, 3, y_train, x_train, optimizer, criterion, validationData=(x_val, y_val))
+history = train(rnn, 10, y_train, x_train, optimizer, criterion, validationData=(x_val, y_val))
 
 testDataset = languageDataset(x_test, y_test)
 correct = 0
