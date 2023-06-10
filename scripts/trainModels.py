@@ -1,7 +1,7 @@
 """Train and measure performance of different models.
 
 """
-from languageDetectinator.models import RNN
+from languageDetectinator.models import RNN, LanguageDetector_RNN
 from languageDetectinator.datasets import Vocabulary, languageDataset
 import glob
 import os
@@ -97,7 +97,7 @@ x_train, testX, y_train, testY = train_test_split(languageVectors, languageIds, 
 x_val, x_test, y_val, y_test = train_test_split(testX, testY, test_size=0.5)
 
 n_hidden = 128
-rnn = RNN(26, n_hidden, len(languages))
+rnn = LanguageDetector_RNN(26, len(languages), [256])
 criterion = nn.NLLLoss()
 optimizer = optim.SGD(rnn.parameters(), lr=0.005)
 

@@ -7,6 +7,9 @@ from torch import nn
 from torch import optim
 
 class RNN(nn.Module):
+    """Tutorial version of the RNN
+    
+    """
     def __init__(self, input_size, hidden_size, output_size):
         super(RNN, self).__init__()
 
@@ -36,30 +39,37 @@ class LanguageDetector_RNN(nn.Module):
         self.outputSize = outputSize
         self.hiddenSizes = hiddenSizes
 
-        self.hidden1 = nn.Linear(self.inputSize + 1024, 128)
-        self.hidden2 = nn.Linear(128, 256)
-        self.hidden3 = nn.Linear(256, 512)
-        self.hidden4 = nn.Linear(512, 1024)
-        self.output = nn.Linear(self.inputSize + 1024, self.outputSize)
-        self.softmax = nn.LogSoftmax(dim=2)
+        # first layer should be (input+last, n) for sizes
+        # other hidden layers
+        self.hiddenLayers = nn.ModuleList()
+        for i, size in enumerate(self.hiddenSizes):
+            if i==0:
+                self.hiddenLayers.append(nn.Linear(self.inputSize + self.hiddenSizes[-1], size))
+            else:
+                self.hiddenLayers.append(nn.Linear(self.hiddenSizes[i-1], size))
+        self.output = nn.Linear(self.inputSize + self.hiddenSizes[-1], self.outputSize)
+        self.softmax = nn.LogSoftmax(dim=1)
 
         return None
 
     def forward(self, input, hidden):
-        combined = torch.cat((input, hidden[-1]), 2)
+        combined = torch.cat((input, hidden[-1]), 1)
 
-        h1 = self.hidden1(combined)
-        h2 = self.hidden2(h1)
-        h3 = self.hidden3(h2)
-        h4 = self.hidden4(h3)
-        hidden = [h1, h2, h3, h4]
+        hiddenStates = []
+        for i, hiddenLayer in enumerate(self.hiddenLayers):
+            if i==0:
+                newHidden = hiddenLayer(combined)
+            else:
+                newHidden = hiddenLayer(hidden[i-1])
+            hiddenStates.append(newHidden)
 
         output = self.output(combined)
         output = self.softmax(output)
-        return output, hidden
+
+        return output, hiddenStates
     
-    def initHidden(self, sequence_length: int=1, batch_size: int=1):
-        hidden_states = []
+    def initHidden(self):
+        self.hidden_states = []
         for size in self.hiddenSizes:
-            hidden_states.append(torch.zeros(sequence_length, batch_size, size))
-        return hidden_states
+            self.hidden_states.append(torch.zeros(1, size))
+        return self.hidden_states
