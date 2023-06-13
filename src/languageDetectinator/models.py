@@ -1,10 +1,8 @@
 """Deep learning models to learn and guess what language a word is
 
 """
-import numpy as np
 import torch
 from torch import nn
-from torch import optim
 
 class RNN(nn.Module):
     """Tutorial version of the RNN
@@ -30,7 +28,7 @@ class RNN(nn.Module):
         return torch.zeros(1, self.hidden_size)
     
 class LanguageDetector_RNN(nn.Module):
-    """Character level RNN like the tutorial uses
+    """Character level RNN like the tutorial uses - edited to take a variety of hidden layer sizes
     
     """
     def __init__(self, inputSize: int, outputSize: int, hiddenSizes: list):

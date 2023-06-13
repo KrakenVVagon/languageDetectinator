@@ -1,6 +1,4 @@
 from languageDetectinator.datasets import Language
-import numpy as np
-import random
 
 language_tags = {
 
@@ -31,30 +29,14 @@ def outputVector(index: int, totalLangs: int) -> list:
     return [float(v) for v in stringVec]
 
 def main():
-    vecs = []
-    outVecs = []
-    i = 0
     for key, value in language_tags.items():
         lang = Language(key)
         vocab = lang.generateVocabulary(topics=value, decodeLang=True)
-
-        with open(f"data/raw/{key}_full.txt","w",encoding="utf-8") as txtFile:
-            txtFile.write(vocab.text)
-
         vocab.pruneVocabulary(12, duplicate=False, keepAccents=False)
         print(f"Found {len(vocab.words)} words.")
         
         with open(f"data/processed/{key}.txt","w",encoding="utf-8") as txtFile:
             txtFile.write(" ".join(vocab.words))
-
-        longVecs = vocab.vectorizeVocabulary(12, flat=False)
-        longVecs = longVecs[np.random.choice(longVecs.shape[0], 10000, replace=False), :, :]
-        vecs.append(longVecs)
-        outVecs += [i]*10000
-        i += 1
-
-    np.save("./data/processed/tokenVectors.npy", np.vstack(vecs))
-    np.save("./data/processed/tokenLabels.npy", np.array(outVecs))
 
 if __name__ == "__main__":
     main()
