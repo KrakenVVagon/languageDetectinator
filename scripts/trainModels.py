@@ -97,7 +97,7 @@ x_train, testX, y_train, testY = train_test_split(languageVectors, languageIds, 
 x_val, x_test, y_val, y_test = train_test_split(testX, testY, test_size=0.5)
 
 n_hidden = 128
-rnn = LanguageDetector_RNN(26, len(languages), [512])
+rnn = LanguageDetector_RNN(26, len(languages), [128])
 criterion = nn.NLLLoss()
 optimizer = optim.SGD(rnn.parameters(), lr=0.005)
 
